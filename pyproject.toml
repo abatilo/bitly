@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "bitly"
+version = "0.1.0"
+description = ""
+authors = ["Aaron <AaronBatilo@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+typed-json-dataclass = "^1.2"
+sanic = "^19.6"
+sanic-openapi = "^0.5.3"
+black = {version = "^18.3-alpha.0", allows-prereleases = true}
+pylint = {version = "^2.3", allows-prereleases = true}
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+
+[tool.poetry.scripts]
+entrypoint = 'bitly:entrypoint.main'
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
