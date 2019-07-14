@@ -96,6 +96,10 @@ async def _fetch_clicks_per_country(session, bitlinks, *, unit="day", units=30):
             print(await response.text())
             return None, False
 
+    import json
+    print(json.dumps(responses, indent=2))
+
+
     metrics = flatten((response["metrics"] for response in responses))
 
     click_sums = defaultdict(int)

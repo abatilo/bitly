@@ -1,0 +1,3 @@
+[report]
+omit =
+    ./bitly/entrypoint.py
