@@ -45,4 +45,4 @@ build: ## Build the final container for running this application
 
 .PHONY: run
 run: build ## Run this application locally, within a container
-	docker run -it $(CONTAINER_NAME)
+	docker run -it -p8000:8000 $(CONTAINER_NAME)

@@ -8,6 +8,9 @@ from http import HTTPStatus
 
 import asyncio
 import aiohttp
+from sanic import Sanic
+from sanic.response import json
+from sanic.exceptions import ServerError
 
 _BITLY_BASE_URL = "https://api-ssl.bitly.com/v4"
 
@@ -109,32 +112,52 @@ async def fetch_clicks_per_country(session, bitlinks, *, unit="day", units=30):
     return click_sums, True
 
 
-async def main(loop):
+async def fetch_averaged_metrics_per_country(_):
     """
-    Main entrypoint of this application
+    Calculates the average number of clicks on a bitlink, grouped by country, averaged
+    over some period of time
     """
     headers = {"Authorization": "Bearer 2259b2b77fc1bda9ba43555fc983a24cb0104f0e"}
-    async with aiohttp.ClientSession(loop=loop, headers=headers) as session:
+    async with aiohttp.ClientSession(headers=headers) as session:
         group_id, success = await fetch_default_group_id(session)
         if not success:
-            print("Problem getting group id")
-            return
+            raise ServerError(
+                "There was a problem retrieving the group id",
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+            )
 
         bitlinks, success = await fetch_bitlink_ids(session, group_id)
         if not success:
             print("Problem getting bitlink ids")
-            return
+            raise ServerError(
+                "There was a problem getting the bitlink ids for your group",
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+            )
 
-        click_sums, success = await fetch_clicks_per_country(session, bitlinks)
+        click_sums, success = await fetch_clicks_per_country(
+            session, bitlinks
+        )
         if not success:
             print("Problem getting bitlink metrics")
-            return
+            raise ServerError(
+                "There was a problem with retrieving metrics per country",
+                HTTPStatus.INTERNAL_SERVER_ERROR,
+            )
 
         averaged = {country: clicks / 30 for country, clicks in click_sums.items()}
-        print(averaged)
+        return json(averaged)
+
+
+def main():
+    """
+    Main entrypoint of this application
+    """
+    app = Sanic(__name__)
+    app.add_route(
+        fetch_averaged_metrics_per_country, "/countries/metrics", version="v1"
+    )
+    app.run(host="0.0.0.0", port=8000, debug=True)
 
 
 if __name__ == "__main__":
-    LOOP = asyncio.get_event_loop()
-    LOOP.run_until_complete(main(LOOP))
-    LOOP.close()
+    main()
