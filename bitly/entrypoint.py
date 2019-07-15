@@ -2,7 +2,6 @@
 Bit.ly Backend Coding Challenge
 """
 
-from sanic import Sanic
 from sanic_json_logging import setup_json_logging, NoAccessLogSanic
 
 from bitly.handlers import fetch_averaged_metrics_per_country
