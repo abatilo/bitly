@@ -16,7 +16,8 @@ from bitly.util import flatten
 
 _BITLY_BASE_URL = "https://api-ssl.bitly.com/v4"
 
-logger = logging.getLogger('root')
+logger = logging.getLogger("root")
+
 
 async def _fetch_default_group_id(session):
     """
