@@ -10,7 +10,7 @@ help: ## View help information
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .PHONY: build_formatter
-build_formatter: ## Builds the container to run formatting commands in
+build_formatter:
 	docker build \
 		-t $(FORMATTER_NAME) \
 		-f ./ci/black/Dockerfile \
@@ -26,7 +26,7 @@ format: build_formatter ## Formats the code to the `black` standard
 		/src/tests
 
 .PHONY: build_linter
-build_linter: ## Builds the container to run linting commands in
+build_linter:
 	docker build \
 		-t $(LINTER_NAME) \
 		-f ./ci/pylint/Dockerfile \
@@ -42,7 +42,7 @@ lint: build_linter ## Runs `pylint`
 		/src/tests
 
 .PHONY: build_tester
-build_tester: ## Builds the container to run tests in
+build_tester:
 	docker build \
 		-t $(TESTER_NAME) \
 		-f ./ci/pytest/Dockerfile \
