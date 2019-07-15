@@ -6,8 +6,9 @@ RUN pip install poetry==0.12.11 && \
 	poetry install
 
 COPY . /src/
-RUN poetry run black --check bitly && \
-      poetry run pylint bitly
+RUN poetry run black --check bitly tests && \
+      poetry run pylint bitly tests && \
+      poetry run python -m pytest --cov=bitly --cov-branch --cov-fail-under=100
 RUN poetry build
 RUN pip install .
 

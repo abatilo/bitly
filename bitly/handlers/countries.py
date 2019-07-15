@@ -128,7 +128,11 @@ async def fetch_averaged_metrics_per_country(req):
                 HTTPStatus.INTERNAL_SERVER_ERROR,
             )
 
-        click_sums, success = await _fetch_clicks_per_country(session, bitlinks)
+        unit = "day"
+        units = 30
+        click_sums, success = await _fetch_clicks_per_country(  # pylint: disable=too-many-function-args
+            session, bitlinks, unit=unit, units=units
+        )
         if not success:
             print("Problem getting bitlink metrics")
             raise ServerError(
@@ -136,5 +140,7 @@ async def fetch_averaged_metrics_per_country(req):
                 HTTPStatus.INTERNAL_SERVER_ERROR,
             )
 
-        averaged = {country: clicks / 30 for country, clicks in click_sums.items()}
+        metrics = {country: clicks / 30 for country, clicks in click_sums.items()}
+        metrics["type"] = "clicks"
+        averaged = {"unit": unit, "units": units, "metrics": metrics}
         return json(averaged)

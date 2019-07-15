@@ -71,9 +71,14 @@ html_coverage: build_tester ## Runs `pytest` and writes out a coverage report in
 check: format lint test ## Runs code quality checks
 
 .PHONY: build
-build: ## Build the final container for running this application
+build: check ## Build the final container for running this application
 	docker build -t $(CONTAINER_NAME) .
 
 .PHONY: run
-run: build ## Run this application locally, within a container
+run: build ## Run this application locally, within a container (Requires port 8000)
 	docker run -it -p8000:8000 $(CONTAINER_NAME)
+
+.PHONY: clean
+clean: ## Deletes the Docker images that have been built to run this application
+	docker rmi --force \
+		$(CONTAINER_NAME) $(FORMATTER_NAME) $(LINTER_NAME) $(TESTER_NAME)

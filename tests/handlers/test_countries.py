@@ -63,7 +63,11 @@ async def test_basic_happy_path(req, headers):
             payload=fetch_clicks_per_country_success,
         )
 
-        expected = {"US": 0.0666666667}
+        expected = {
+            "metrics": {"type": "clicks", "US": 0.0666666667},
+            "unit": "day",
+            "units": 30,
+        }
         actual = json.loads((await fetch_averaged_metrics_per_country(req)).body)
         assert expected == actual
 
