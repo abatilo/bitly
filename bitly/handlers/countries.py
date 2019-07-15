@@ -2,6 +2,7 @@
 Methods for handling any requests dealing with countries
 """
 import math
+import logging
 from collections import defaultdict
 from http import HTTPStatus
 
@@ -15,6 +16,7 @@ from bitly.util import flatten
 
 _BITLY_BASE_URL = "https://api-ssl.bitly.com/v4"
 
+logger = logging.getLogger('root')
 
 async def _fetch_default_group_id(session):
     """
@@ -24,7 +26,7 @@ async def _fetch_default_group_id(session):
     async with session.get(f"{_BITLY_BASE_URL}/user") as response:
         if response.status == HTTPStatus.OK:
             return (await response.json())["default_group_guid"], True
-        print(await response.text())
+        log.error(await response.text())
     return None, False
 
 
@@ -49,7 +51,7 @@ async def _fetch_bitlink_ids(session, group_id):
             size = pagination["size"]
             number_of_concurrent_requests_to_make = int(math.ceil(total / size))
         else:
-            print(await response.text())
+            log.error(await response.text())
             return None, False
 
     coroutines = (
@@ -64,7 +66,7 @@ async def _fetch_bitlink_ids(session, group_id):
         if response.status == HTTPStatus.OK:
             responses.append(await response.json())
         else:
-            print(await response.text())
+            log.error(await response.text())
             return None, False
 
     links = flatten((response.get("links", {}) for response in responses))
@@ -94,7 +96,7 @@ async def _fetch_clicks_per_country(session, bitlinks, *, unit="day", units=30):
         if response.status == HTTPStatus.OK:
             responses.append(await response.json())
         else:
-            print(await response.text())
+            log.error(await response.text())
             return None, False
 
     metrics = flatten((response["metrics"] for response in responses))
@@ -122,7 +124,7 @@ async def fetch_averaged_metrics_per_country(req):
 
         bitlinks, success = await _fetch_bitlink_ids(session, group_id)
         if not success:
-            print("Problem getting bitlink ids")
+            log.error("Problem getting bitlink ids")
             raise ServerError(
                 "There was a problem getting the bitlink ids for your group",
                 HTTPStatus.INTERNAL_SERVER_ERROR,
@@ -134,7 +136,7 @@ async def fetch_averaged_metrics_per_country(req):
             session, bitlinks, unit=unit, units=units
         )
         if not success:
-            print("Problem getting bitlink metrics")
+            log.error("Problem getting bitlink metrics")
             raise ServerError(
                 "There was a problem with retrieving metrics per country",
                 HTTPStatus.INTERNAL_SERVER_ERROR,
