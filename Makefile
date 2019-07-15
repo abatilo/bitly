@@ -54,7 +54,7 @@ test: build_tester ## Runs `pytest`
 		--mount type=bind,src=`pwd`,dst=/src \
 		--workdir /src \
 		-it $(TESTER_NAME) \
-		--cov=/src/bitly --cov-branch \
+		--cov=/src/bitly --cov-branch --cov-fail-under=100 \
 		/src/tests/
 
 .PHONY: html_coverage
@@ -68,7 +68,7 @@ html_coverage: build_tester ## Runs `pytest` and writes out a coverage report in
 
 
 .PHONY: check
-check: format lint ## Runs code quality checks
+check: format lint test ## Runs code quality checks
 
 .PHONY: build
 build: ## Build the final container for running this application

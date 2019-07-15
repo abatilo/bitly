@@ -41,12 +41,16 @@ async def _fetch_bitlink_ids(session, group_id):
 
     # First request to get total number of links
     async with session.get(first_page) as response:
-        resp_json = await response.json()
-        responses.append(resp_json)
-        pagination = resp_json["pagination"]
-        total = pagination["total"]
-        size = pagination["size"]
-        number_of_concurrent_requests_to_make = int(math.ceil(total / size))
+        if response.status == HTTPStatus.OK:
+            resp_json = await response.json()
+            responses.append(resp_json)
+            pagination = resp_json["pagination"]
+            total = pagination["total"]
+            size = pagination["size"]
+            number_of_concurrent_requests_to_make = int(math.ceil(total / size))
+        else:
+            print(await response.text())
+            return None, False
 
     coroutines = (
         session.get(
@@ -66,10 +70,7 @@ async def _fetch_bitlink_ids(session, group_id):
     links = flatten((response.get("links", {}) for response in responses))
     bitlinks = []
     for link in links:
-        if "id" in link:
-            bitlinks.append(link["id"])
-        else:
-            return None, False
+        bitlinks.append(link["id"])
     return bitlinks, True
 
 
@@ -95,10 +96,6 @@ async def _fetch_clicks_per_country(session, bitlinks, *, unit="day", units=30):
         else:
             print(await response.text())
             return None, False
-
-    import json
-    print(json.dumps(responses, indent=2))
-
 
     metrics = flatten((response["metrics"] for response in responses))
 
